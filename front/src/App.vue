@@ -3,8 +3,13 @@
 		<!-- 左侧边栏 -->
 		<div class="sidebar" :class="{ 'sidebar-collapsed': isSidebarCollapsed }">
 			<div class="sidebar-header">
-				<h2 v-if="!isSidebarCollapsed">医疗助手</h2>
-				<button class="collapse-btn" @click="toggleSidebar">
+				<div class="header-content" v-if="!isSidebarCollapsed">
+					<div class="logo">
+						<i class="el-icon-first-aid-kit"></i>
+					</div>
+					<h2>医疗助手</h2>
+				</div>
+				<button class="collapse-btn" @click="toggleSidebar" :title="isSidebarCollapsed ? '展开侧边栏' : '收起侧边栏'">
 					<i :class="isSidebarCollapsed ? 'el-icon-s-unfold' : 'el-icon-s-fold'"></i>
 				</button>
 			</div>
@@ -15,14 +20,20 @@
 					<span>新建对话</span>
 				</button>
 
-				<div class="history-list">
-					<div v-for="(chat, index) in chatHistory" :key="index" class="history-item"
-						:class="{ 'active': currentChatIndex === index }" @click="switchChat(index)">
-						<i class="el-icon-chat-dot-round"></i>
-						<span class="history-title">{{ chat.title || '新对话' }}</span>
-						<button class="delete-btn" @click.stop="deleteChat(index)">
-							<i class="el-icon-close"></i>
-						</button>
+				<div class="history-section">
+					<div class="section-title">
+						<i class="el-icon-time"></i>
+						<span>对话历史</span>
+					</div>
+					<div class="history-list">
+						<div v-for="(chat, index) in chatHistory" :key="index" class="history-item"
+							:class="{ 'active': currentChatIndex === index }" @click="switchChat(index)">
+							<i class="el-icon-chat-dot-round"></i>
+							<span class="history-title">{{ chat.title || '新对话' }}</span>
+							<button class="delete-btn" @click.stop="deleteChat(index)" title="删除对话">
+								<i class="el-icon-delete"></i>
+							</button>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -31,14 +42,28 @@
 		<!-- 主聊天区域 -->
 		<div class="main-content">
 			<div v-if="!currentChat" class="empty-state">
-				<i class="el-icon-chat-line-round"></i>
+				<div class="empty-icon">
+					<i class="el-icon-chat-line-round"></i>
+				</div>
 				<h3>欢迎使用医疗问答助手</h3>
-				<p>点击"新建对话"开始咨询</p>
+				<p>点击"新建对话"开始您的健康咨询之旅</p>
+				<button class="start-chat-btn" @click="createNewChat">
+					<i class="el-icon-plus"></i>
+					开始对话
+				</button>
 			</div>
 
 			<div v-else class="chat-container">
 				<div class="chat-header">
-					<h3>{{ currentChat.title || '新对话' }}</h3>
+					<div class="header-info">
+						<i class="el-icon-chat-dot-round"></i>
+						<h3>{{ currentChat.title || '新对话' }}</h3>
+					</div>
+					<div class="header-actions">
+						<button class="action-btn" @click="createNewChat" title="新建对话">
+							<i class="el-icon-plus"></i>
+						</button>
+					</div>
 				</div>
 
 				<div class="chat-messages" ref="messagesContainer">
@@ -49,8 +74,18 @@
 
 					<div v-if="isLoading" class="loading-wrapper">
 						<div class="message-bubble assistant">
+							<div class="message-avatar">
+								<i class="el-icon-user-solid"></i>
+							</div>
 							<div class="message-content">
-								<i class="el-icon-loading"></i> 正在思考中...
+								<div class="message-text">
+									<div class="typing-indicator">
+										<span></span>
+										<span></span>
+										<span></span>
+									</div>
+									正在思考中...
+								</div>
 							</div>
 						</div>
 					</div>
@@ -58,13 +93,34 @@
 
 				<div class="input-area">
 					<div class="input-wrapper">
-						<textarea v-model="newMessage" placeholder="输入您的问题..." @keyup.enter.exact="sendMessage" rows="1"
-							ref="textarea" @input="adjustTextareaHeight" :disabled="isLoading"></textarea>
-						<button class="send-btn" @click="sendMessage" :disabled="!newMessage.trim() || isLoading">
-							<i class="el-icon-s-promotion"></i>
+						<textarea 
+							v-model="newMessage" 
+							placeholder="输入您的健康问题..." 
+							@keyup.enter.exact="sendMessage" 
+							rows="1"
+							ref="textarea" 
+							@input="adjustTextareaHeight" 
+							:disabled="isLoading"
+						></textarea>
+						<button 
+							class="send-btn" 
+							@click="sendMessage" 
+							:disabled="!newMessage.trim() || isLoading"
+							:title="isLoading ? '正在处理...' : '发送消息'"
+						>
+							<i :class="isLoading ? 'el-icon-loading' : 'el-icon-s-promotion'"></i>
 						</button>
 					</div>
-					<p class="input-hint">医疗助手仅供参考，如有不适请及时就医</p>
+					<div class="input-footer">
+						<p class="input-hint">
+							<i class="el-icon-info"></i>
+							医疗助手仅供参考，如有不适请及时就医
+						</p>
+						<div v-if="error" class="error-message">
+							<i class="el-icon-warning"></i>
+							{{ error }}
+						</div>
+					</div>
 				</div>
 			</div>
 		</div>
