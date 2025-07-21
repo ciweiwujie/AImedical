@@ -10,7 +10,7 @@ from flask_cors import CORS
 
 # 添加路径以便导入model模块
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'model'))
-from Task.model.medical_tokenizer import MedicalTokenizer
+from model.medical_tokenizer import MedicalTokenizer
 
 app = Flask(__name__)
 CORS(app)
